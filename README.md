@@ -1,3 +1,20 @@
+> **⚠️ Scittle Fork**
+> 
+> This is a temporary fork of [taoensso/trove](https://github.com/taoensso/trove) to provide 
+> Scittle/SCI compatibility. The `scittle` branch contains a one-line fix to `utils.cljc` that 
+> adds a `:scittle` reader conditional for the `Cons` type check (SCI doesn't expose `cljs.core/Cons`).
+>
+> **CDN URLs** (use these in your Scittle projects):
+> ```
+> https://cdn.jsdelivr.net/gh/franks42/trove-scittle@v1.1.0-scittle/src/taoensso/trove/utils.cljc
+> https://cdn.jsdelivr.net/gh/franks42/trove-scittle@v1.1.0-scittle/src/taoensso/trove/console.cljc
+> https://cdn.jsdelivr.net/gh/franks42/trove-scittle@v1.1.0-scittle/src/taoensso/trove.cljc
+> ```
+>
+> Once the fix is merged upstream, this fork will no longer be needed.
+
+---
+
 <a href="https://www.taoensso.com/clojure" title="More stuff by @ptaoussanis at www.taoensso.com"><img src="https://www.taoensso.com/open-source.png" alt="Taoensso open source" width="340"/></a>  
 [**API**][cljdoc] | [Slack channel][] | Latest release: [v1.1.0](../../releases/tag/v1.1.0) (2025-10-11)
 
