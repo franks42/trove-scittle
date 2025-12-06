@@ -4,8 +4,6 @@
   "description": "Playwright tests for Trove in Scittle",
   "scripts": {
     "test": "node playwright-test.mjs",
-    "test:merged": "node playwright-test.mjs merged",
-    "test:all": "node playwright-test.mjs && node playwright-test.mjs merged",
     "install-playwright": "npx playwright install chromium"
   },
   "devDependencies": {

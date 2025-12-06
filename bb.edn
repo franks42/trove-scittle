@@ -1,11 +1,6 @@
 {:paths ["bb"]
  :tasks
- {build:scittle
-  {:doc "Build merged trove_scittle.cljs for Scittle"
-   :extra-paths ["src"]
-   :task (load-file "bb/build_scittle.clj")}
-
-  test:bb-trove
+ {test:bb-trove
   {:doc "Run standard Trove tests with babashka"
    :extra-paths ["src" "test"]
    :extra-deps {io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}

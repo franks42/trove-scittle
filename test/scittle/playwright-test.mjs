@@ -37,11 +37,7 @@ function startServer(port) {
       
       if (url.pathname === '/') {
         filePath = join(__dirname, 'test-trove.html');
-      } else if (url.pathname === '/merged') {
-        filePath = join(__dirname, 'test-trove-merged.html');
       } else if (url.pathname.startsWith('/src/')) {
-        filePath = join(projectRoot, url.pathname);
-      } else if (url.pathname.startsWith('/dist/')) {
         filePath = join(projectRoot, url.pathname);
       } else {
         filePath = join(__dirname, url.pathname);
@@ -67,12 +63,7 @@ function startServer(port) {
 }
 
 async function runTests() {
-  // Check for "merged" argument
-  const testMerged = process.argv.includes('merged');
-  const testPath = testMerged ? '/merged' : '/';
-  const testName = testMerged ? 'Merged File' : 'Separate Files';
-  
-  console.log(`🧪 Trove Scittle Test (${testName})\n`);
+  console.log('🧪 Trove Scittle Test\n');
   console.log('='.repeat(60));
   
   const port = 8765;
@@ -97,9 +88,9 @@ async function runTests() {
     console.log(`  ❌ [Page Error] ${error.message}`);
   });
   
-  console.log(`📄 Loading test page: http://localhost:${port}${testPath}\n`);
+  console.log(`📄 Loading test page: http://localhost:${port}\n`);
   
-  await page.goto(`http://localhost:${port}${testPath}`, { waitUntil: 'networkidle' });
+  await page.goto(`http://localhost:${port}`, { waitUntil: 'networkidle' });
   
   // Wait for tests to complete
   await page.waitForTimeout(3000);
