@@ -4,7 +4,7 @@
 (def ^:no-doc ^:const nl "System line separator"
   #?(:clj (System/getProperty "line.separator") :cljs "\n"))
 
-(let [cons? (fn [x] (instance? #?(:clj clojure.lang.Cons, :cljs cljs.core/Cons) x))]
+(let [cons? (fn [x] (instance? #?(:clj clojure.lang.Cons, :scittle (type (cons 1 [])), :cljs cljs.core/Cons) x))]
   (defn ^:no-doc const-form? [form]
     (cond
       (list? form) false
