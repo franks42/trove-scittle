@@ -44,10 +44,10 @@
                "<p><strong>" passed "/" total "</strong> tests passed</p></div>"))))
 
     ;; Test 1: Namespace loaded
-    (println "Test 1: taoensso.trove namespace...")
+    (println "Test 1: taoensso.trove-scittle namespace...")
     (try
-      (require '[taoensso.trove :as trove])
-      (add-result! "Namespace loaded" true "taoensso.trove OK")
+      (require '[taoensso.trove-scittle :as trove])
+      (add-result! "Namespace loaded" true "taoensso.trove-scittle OK")
       (println "PASS Test 1")
       (catch :default e
         (add-result! "Namespace loaded" false (str e))
@@ -56,7 +56,7 @@
     ;; Test 2: *log-fn* exists
     (println "Test 2: *log-fn*...")
     (try
-      (let [log-fn @(resolve 'taoensso.trove/*log-fn*)]
+      (let [log-fn @(resolve 'taoensso.trove-scittle/*log-fn*)]
         (if (fn? log-fn)
           (do (add-result! "*log-fn*" true "Is function") (println "PASS Test 2"))
           (do (add-result! "*log-fn*" false "Not function") (println "FAIL Test 2"))))
@@ -67,7 +67,7 @@
     ;; Test 3: log! macro
     (println "Test 3: log! macro...")
     (try
-      (require '[taoensso.trove :refer [log!]])
+      (require '[taoensso.trove-scittle :refer [log!]])
       (log! {:level :info :id :test/merged :msg "Hello from merged file!"})
       (add-result! "log! macro" true "Executed")
       (println "PASS Test 3")
@@ -114,9 +114,9 @@
     ;; Test 7: set-log-fn!
     (println "Test 7: set-log-fn!...")
     (try
-      (require '[taoensso.trove :refer [set-log-fn!]])
+      (require '[taoensso.trove-scittle :refer [set-log-fn!]])
       (def call-count (atom 0))
-      (def original-log-fn @(resolve 'taoensso.trove/*log-fn*))
+      (def original-log-fn @(resolve 'taoensso.trove-scittle/*log-fn*))
       (set-log-fn! (fn [ns coords level id lazy_] (swap! call-count inc)))
       (log! {:level :info :id :test/custom :msg "custom"})
       (if (= @call-count 1)

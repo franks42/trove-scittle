@@ -40,6 +40,13 @@
       (str/replace #"utils/" "")
       (str/replace #"console/" "")))
 
+(defn fix-dynamic-vars
+  "Add ^:dynamic metadata to earmuffed vars that lost it during parsing"
+  [s]
+  (-> s
+      ;; Fix *log-fn* to have ^:dynamic (pprint puts def and name on separate lines)
+      (str/replace #"\(def\n \*log-fn\*" "(def ^:dynamic\n *log-fn*")))
+
 (defn build-merged-file []
   (let [;; Parse all source files
         utils-forms   (parse-file "src/taoensso/trove/utils.cljc" 'taoensso.trove.utils)
@@ -63,11 +70,14 @@
 ;; =============================================================================
 
 "
-        ns-form "(ns taoensso.trove
+        ns-form "(ns taoensso.trove-scittle
   \"A minimal, modern logging facade for Clojure/Script.
   Supports both traditional and structured logging.
   
-  This is a merged single-file version for Scittle/SCI.\"
+  This is a merged single-file version for Scittle/SCI.
+  
+  Note: This file uses namespace taoensso.trove-scittle to match the filename,
+  but provides the same API as taoensso.trove.\"
   {:author \"Peter Taoussanis (@ptaoussanis)\"}
   (:require [clojure.string :as str]))
 
@@ -88,15 +98,16 @@
 
 "]
     
-    (replace-ns-prefixes
-      (str header
-           ns-form
-           utils-section
-           (str/join "\n" (map pprint-str utils-body))
-           console-section
-           (str/join "\n" (map pprint-str console-body))
-           trove-section
-           (str/join "\n" (map pprint-str trove-body))))))
+    (-> (str header
+             ns-form
+             utils-section
+             (str/join "\n" (map pprint-str utils-body))
+             console-section
+             (str/join "\n" (map pprint-str console-body))
+             trove-section
+             (str/join "\n" (map pprint-str trove-body)))
+        replace-ns-prefixes
+        fix-dynamic-vars)))
 
 (defn -main [& _args]
   (let [output-dir "dist"
