@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Trove Upstream Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/scittle@0.7.28/dist/scittle.js"></script>
+  <!-- Load modified upstream Trove files from /tmp -->
+  <script src="/tmp/trove-upstream/utils.cljc" type="application/x-scittle"></script>
+  <script src="/tmp/trove-upstream/console.cljc" type="application/x-scittle"></script>
+  <script src="/tmp/trove-upstream/trove.cljc" type="application/x-scittle"></script>
+  <style>
+    body { font-family: -apple-system, sans-serif; margin: 20px; background: #1a1a2e; color: #eee; }
+    h1 { color: #00d4ff; }
+    .test { background: #16213e; border: 1px solid #0f3460; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    .pass { border-left: 4px solid #00ff88; }
+    .fail { border-left: 4px solid #ff4444; }
+    .summary { background: #0f3460; padding: 15px; border-radius: 5px; margin-top: 20px; }
+    .summary.all-pass { border: 2px solid #00ff88; }
+    .summary.has-fail { border: 2px solid #ff4444; }
+    pre { background: #0f0f23; padding: 10px; overflow-x: auto; margin: 5px 0; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <h1>Trove Upstream Test</h1>
+  <p>Testing Trove from GitHub master branch</p>
+  <div id="results"></div>
+  <div id="summary"></div>
+  <script type="application/x-scittle">
+    (def results (atom []))
+    (defn add-result! [name passed? details]
+      (swap! results conj {:name name :passed? passed? :details details}))
+    (defn render-results! []
+      (let [html (apply str
+                   (for [{:keys [name passed? details]} @results]
+                     (str "<div class='test " (if passed? "pass" "fail") "'>"
+                          "<strong>" (if passed? "PASS" "FAIL") " " name "</strong>"
+                          "<pre>" details "</pre></div>")))]
+        (set! (.-innerHTML (js/document.getElementById "results")) html)))
+    (defn render-summary! []
+      (let [passed (count (filter :passed? @results))
+            total (count @results)
+            all-pass? (= passed total)]
+        (set! (.-innerHTML (js/document.getElementById "summary"))
+          (str "<div class='summary " (if all-pass? "all-pass" "has-fail") "'>"
+               "<h2>" (if all-pass? "All Tests Passed!" "Some Tests Failed") "</h2>"
+               "<p><strong>" passed "/" total "</strong> tests passed</p></div>"))))
+
+    (println "Test 1: Loading utils...")
+    (try
+      (require '[taoensso.trove.utils :as utils])
+      (add-result! "Load utils" true "OK")
+      (println "PASS Test 1")
+      (catch :default e
+        (add-result! "Load utils" false (str e))
+        (println "FAIL Test 1:" e)))
+
+    (println "Test 2: const-form? (JVM-only, skip in Scittle)...")
+    ;; const-form? is wrapped in #?(:clj ...) so not available in ClojureScript/Scittle
+    ;; This is expected - it's only needed at macro-expansion time on JVM
+    (let [const-form? (resolve 'taoensso.trove.utils/const-form?)]
+      (if const-form?
+        (do (add-result! "const-form?" true "Available (unexpected in Scittle)") (println "PASS Test 2"))
+        (do (add-result! "const-form? (JVM-only)" true "Not available in Scittle (expected)") (println "PASS Test 2 (skipped - JVM only)"))))
+
+    (println "Test 3: Loading console...")
+    (try
+      (require '[taoensso.trove.console :as console])
+      (add-result! "Load console" true "OK")
+      (println "PASS Test 3")
+      (catch :default e
+        (add-result! "Load console" false (str e))
+        (println "FAIL Test 3:" e)))
+
+    (println "Test 4: get-log-fn...")
+    (try
+      (let [get-log-fn (resolve 'taoensso.trove.console/get-log-fn)]
+        (if (and get-log-fn (fn? (@get-log-fn)))
+          (do (add-result! "get-log-fn" true "Returns function") (println "PASS Test 4"))
+          (do (add-result! "get-log-fn" false "Not a function") (println "FAIL Test 4"))))
+      (catch :default e
+        (add-result! "get-log-fn" false (str e))
+        (println "FAIL Test 4:" e)))
+
+    (println "Test 5: Loading trove...")
+    (try
+      (require '[taoensso.trove :as trove])
+      (add-result! "Load trove" true "OK")
+      (println "PASS Test 5")
+      (catch :default e
+        (add-result! "Load trove" false (str e))
+        (println "FAIL Test 5:" e)))
+
+    (println "Test 6: *log-fn*...")
+    (try
+      (let [log-fn @(resolve 'taoensso.trove/*log-fn*)]
+        (if (fn? log-fn)
+          (do (add-result! "*log-fn*" true "Is function") (println "PASS Test 6"))
+          (do (add-result! "*log-fn*" false "Not function") (println "FAIL Test 6"))))
+      (catch :default e
+        (add-result! "*log-fn*" false (str e))
+        (println "FAIL Test 6:" e)))
+
+    (println "Test 7: log! macro...")
+    (try
+      (require '[taoensso.trove :refer [log!]])
+      (log! {:level :info :id :test/basic :msg "Hello from upstream!"})
+      (add-result! "log! macro" true "Executed")
+      (println "PASS Test 7")
+      (catch :default e
+        (add-result! "log! macro" false (str e))
+        (println "FAIL Test 7:" e)))
+
+    (println "Test 8: Structured data...")
+    (try
+      (log! {:level :debug :id :test/data :data {:user 123 :action "test"}})
+      (add-result! "Structured data" true "OK")
+      (println "PASS Test 8")
+      (catch :default e
+        (add-result! "Structured data" false (str e))
+        (println "FAIL Test 8:" e)))
+
+    (println "Test 9: All levels...")
+    (try
+      (log! {:level :trace :id :test/trace :msg "trace"})
+      (log! {:level :debug :id :test/debug :msg "debug"})
+      (log! {:level :info :id :test/info :msg "info"})
+      (log! {:level :warn :id :test/warn :msg "warn"})
+      (log! {:level :error :id :test/error :msg "error"})
+      (log! {:level :fatal :id :test/fatal :msg "fatal"})
+      (log! {:level :report :id :test/report :msg "report"})
+      (add-result! "All levels" true "7 levels OK")
+      (println "PASS Test 9")
+      (catch :default e
+        (add-result! "All levels" false (str e))
+        (println "FAIL Test 9:" e)))
+
+    (println "Test 10: Error logging...")
+    (try
+      (log! {:level :error :id :test/err :msg "Error test" :error (js/Error. "test") :data {:ctx "test"}})
+      (add-result! "Error logging" true "OK")
+      (println "PASS Test 10")
+      (catch :default e
+        (add-result! "Error logging" false (str e))
+        (println "FAIL Test 10:" e)))
+
+    (println "Test 11: Complex data...")
+    (try
+      (log! {:level :info :id :test/complex :data {:user {:id 1 :name "Test"} :nested {:deep [1 2 3]}}})
+      (add-result! "Complex data" true "OK")
+      (println "PASS Test 11")
+      (catch :default e
+        (add-result! "Complex data" false (str e))
+        (println "FAIL Test 11:" e)))
+
+    (println "Test 12: set-log-fn!...")
+    (try
+      (require '[taoensso.trove :refer [set-log-fn!]])
+      (def call-count (atom 0))
+      (set-log-fn! (fn [ns coords level id lazy_] (swap! call-count inc)))
+      (log! {:level :info :id :test/custom :msg "custom"})
+      (if (= @call-count 1)
+        (do (add-result! "set-log-fn!" true "Called once") (println "PASS Test 12"))
+        (do (add-result! "set-log-fn!" false (str "Count: " @call-count)) (println "FAIL Test 12")))
+      (set-log-fn! (taoensso.trove.console/get-log-fn))
+      (catch :default e
+        (add-result! "set-log-fn!" false (str e))
+        (println "FAIL Test 12:" e)))
+
+    (render-results!)
+    (render-summary!)
+    (let [passed (count (filter :passed? @results)) total (count @results)]
+      (println "")
+      (println "RESULTS:" passed "/" total "passed")
+      (if (= passed total)
+        (println "ALL TESTS PASSED - Ready for release!")
+        (println "SOME TESTS FAILED")))
+  </script>
+</body>
+</html>
