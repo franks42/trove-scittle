@@ -1,0 +1,12 @@
+{
+  "name": "trove-scittle-tests",
+  "version": "1.0.0",
+  "description": "Playwright tests for Trove in Scittle",
+  "scripts": {
+    "test": "node playwright-test.mjs",
+    "install-playwright": "npx playwright install chromium"
+  },
+  "devDependencies": {
+    "playwright": "^1.40.0"
+  }
+}
