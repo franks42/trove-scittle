@@ -5,11 +5,20 @@
 > adds a `:scittle` reader conditional for the `Cons` type check (SCI doesn't expose `cljs.core/Cons`).
 >
 > **CDN URLs** (use these in your Scittle projects):
+> ```html
+> <script src="https://cdn.jsdelivr.net/gh/franks42/trove-scittle@v1.1.0-scittle/src/taoensso/trove/utils.cljc" type="application/x-scittle"></script>
+> <script src="https://cdn.jsdelivr.net/gh/franks42/trove-scittle@v1.1.0-scittle/src/taoensso/trove/console.cljc" type="application/x-scittle"></script>
+> <script src="https://cdn.jsdelivr.net/gh/franks42/trove-scittle@v1.1.0-scittle/src/taoensso/trove.cljc" type="application/x-scittle"></script>
 > ```
-> https://cdn.jsdelivr.net/gh/franks42/trove-scittle@v1.1.0-scittle/src/taoensso/trove/utils.cljc
-> https://cdn.jsdelivr.net/gh/franks42/trove-scittle@v1.1.0-scittle/src/taoensso/trove/console.cljc
-> https://cdn.jsdelivr.net/gh/franks42/trove-scittle@v1.1.0-scittle/src/taoensso/trove.cljc
+>
+> **Usage in Scittle code:**
+> ```clojure
+> (require '[taoensso.trove :refer [log!]])
+>
+> (log! {:level :info, :id ::my-event, :msg "Hello from Scittle!"})
 > ```
+> **Note:** SCI/Scittle requires macros to be imported with `:refer` — namespace-qualified 
+> macro calls (e.g., `trove/log!`) are not supported.
 >
 > Once the fix is merged upstream, this fork will no longer be needed.
 
